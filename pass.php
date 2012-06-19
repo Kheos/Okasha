@@ -13,24 +13,27 @@
             <label> Minuscule </label><br/>
             <input type="checkbox" name="chiffre"/>
             <label> Chiffre </label><br/>
-            <input type="text" name="nombre"/>
+			<input type="checkbox" name="special"/>
+            <label> Caractères ASCII </label><br/>
+            <input type="text" name="nombre" onKeypress="if((event.keyCode < 45 || event.keyCode > 57) && event.keyCode > 31 && event.keyCode != 43) event.returnValue = false; if((event.which < 45 || event.which > 57) && event.which > 31 && event.which != 43) return false;">
             <label> Nombre de mot de passe </label><br/>
-            <input type="text" name="longueur"/>
+            <input type="text" name="longueur" onKeypress="if((event.keyCode < 45 || event.keyCode > 57) && event.keyCode > 31 && event.keyCode != 43) event.returnValue = false; if((event.which < 45 || event.which > 57) && event.which > 31 && event.which != 43) return false;">
             <label> Longeur du mot de passe </label><br/>
             <input type="submit" name="boutton"/>
         </form>
         
-        <?php
+<?php
         
-       function getpass($nombre,$valeurs,$nbcarac) {
+function getpass($nombre,$valeurs,$nbcarac) {
     
-    $resultat;
+$resultat = "";
     
-    for($i=0;$i<$nombre;$i++) {
-        
-        $val=$valeurs[rand(0,$nbcarac -1)];
-$resultat=$resultat.$val;
+for ($i=0; $i<$nombre; $i++) {
+      
+    $val = $valeurs[rand(0,$nbcarac -1)];
+	$resultat = $resultat.$val;
 }
+
 return $resultat;
 
 }
@@ -51,36 +54,34 @@ $minuscule = array("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","
   //  tableau de nombre 
 $chiffre = array("0","1","2","3","4","5","6","7","8","9");
 
-echo count($majuscule);
-echo "<br/>";
-echo count($minuscule);
-echo "<br/>";
+$special = array(",","?",";",".",":","/","!","§","&","~","\"","#","(","[","-","|","`","_","\\","^","@",")","]","=","}","<",">");
 
 // verification des checkbox 
 
 // array_merge  : fusionne plusieurs tableaux en un seul
 
-if(isset($_POST['minuscule'])) {
-    
-    $allcaractere=$allcaractere + $minuscule;
-    
-    }
-    
- if (isset($_POST["majuscule"])) {
-     
-     $allcaractere=array_merge($allcaractere,$majuscule);
-    
- }
- 
- if (isset($_POST["chiffre"])) {
-    
-     $allcaractere=array_merge($allcaractere,$chiffre);
-         
-     }
-     
-     $nbcaractere = count($allcaractere);
-     $resut=getpass($_POST["longueur"],$allcaractere,$nbcaractere);
-     echo $resut;
+if (isset($_POST["boutton"])) {
+	if (isset($_POST['minuscule']) || isset($_POST['minuscule']) || isset($_POST['minuscule']) || isset($_POST['minuscule'])) {
+
+		if (isset($_POST['minuscule']))
+			$allcaractere = array_merge($allcaractere, $minuscule);
+
+		 if (isset($_POST["majuscule"]))
+			 $allcaractere = array_merge($allcaractere, $majuscule);
+
+		 if (isset($_POST["chiffre"]))
+			 $allcaractere = array_merge($allcaractere, $chiffre);
+
+		if (isset($_POST["special"]))
+			 $allcaractere = array_merge($allcaractere, $special);
+
+		$nbcaractere = count($allcaractere);
+		$resut = getpass($_POST["longueur"], $allcaractere, $nbcaractere);
+		echo $resut;
+	}
+	else 
+		echo "Veuillez choisir au moins un type de caractère que doit comporter votre mot de passe.";
+}
      
 //$rand_keys = array_rand($majuscule, 10);
 //echo $majuscule[$rand_keys[0]];
