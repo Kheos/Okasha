@@ -2,34 +2,33 @@
 
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>Okasha</title>
         <style type="text/css">
-            h1{
+            h1 {
                 margin-left: 25px;
             }
-            #corps{
+            #corps {
                 width:900px;
-		margin-left:auto;
-		margin-right:auto;
-		background-color:black;
-                color: white;
-		border-radius: 10px;
-		box-shadow: 10px 10px 10px black;
-		border: 0.2px solid black;
-		text-align:left;
-		background-image: url("images/fond.png");
-		padding-bottom: 20px;
-		padding-top: 20px;
-		margin-top: 60px;
-		margin-bottom:0px;
+				margin-left:auto;
+				margin-right:auto;
+				background-color:black;
+				color: white;
+				border-radius: 10px;
+				box-shadow: 10px 10px 10px black;
+				border: 0.2px solid black;
+				text-align:left;
+				background-image: url("images/fond.png");
+				padding-bottom: 20px;
+				padding-top: 20px;
+				margin-top: 60px;
+				margin-bottom:0px;
             }
             #fieldCheck {
                 float:left;
-		margin:0 25px 15px 25px;
+				margin:0 25px 15px 25px;
                 width:180px;
-                height:60px;
-                
+                height:60px; 
             }
             #fieldChamps {
                 margin-right: 25px;
@@ -38,57 +37,41 @@
 	</style> 
     </head>
     <body>
-        <form method="post" action="">
-            <input type="checkbox" name="majuscule"/>
-            <label>Majuscule</label><br/>
-            <input type="checkbox" name="minuscule"/>
-            <label> Minuscule </label><br/>
-            <input type="checkbox" name="chiffre"/>
-            <label> Chiffre </label><br/>
-			<input type="checkbox" name="special"/>
-            <label> Caractères ASCII </label><br/>
-            <input type="text" name="nombre" onKeypress="if((event.keyCode < 45 || event.keyCode > 57) && event.keyCode > 31 && event.keyCode != 43) event.returnValue = false; if((event.which < 45 || event.which > 57) && event.which > 31 && event.which != 43) return false;">
-            <label> Nombre de mot de passe </label><br/>
-            <input type="text" name="longueur" onKeypress="if((event.keyCode < 45 || event.keyCode > 57) && event.keyCode > 31 && event.keyCode != 43) event.returnValue = false; if((event.which < 45 || event.which > 57) && event.which > 31 && event.which != 43) return false;">
-            <label> Longeur du mot de passe </label><br/>
-            <input type="submit" name="boutton"/>
-        </form>
 		<div id="corps"> 
         <h1>Okasha</h1>
+		<form method="post" action="" id="formCheck">
         <fieldset id="fieldCheck">
-            <form method="post" action="" id="formCheck">
                 <input type="checkbox" name="majuscule"/>
                 <label>Majuscule</label><br/>
                 <input type="checkbox" name="minuscule"/>
                 <label>Minuscule </label><br/>
                 <input type="checkbox" name="chiffre"/>
                 <label>Chiffre </label><br/>
-            </form>
+				<input type="checkbox" name="special"/>
+				<label> Caractères ASCII </label><br/>
         </fieldset>
-        <fieldset id="fieldChamps">
-            <form method="post" action="" id="formChamps">     
-                <input type="text" name="nombre"/>
-                <label> Nombre de mot de passe </label><br/>
-                <input type="text" name="longueur"/>
-                <label> Longeur du mot de passe </label><br/>
+        <fieldset id="fieldChamps">    
+                <input type="text" name="nombre" onKeypress="if((event.keyCode < 48 || event.keyCode > 57) && event.which > 31) event.returnValue = false; if((event.which < 48 || event.which > 57) && event.which > 31) return false;">
+				<label> Nombre de mot de passe </label><br/>
+				<input type="text" name="longueur" onKeypress="if((event.keyCode < 48 || event.keyCode > 57) && event.which > 31) event.returnValue = false; if((event.which < 48 || event.which > 57) && event.which > 31) return false;">
+				<label> Longeur du mot de passe </label><br/>
                 <input type="submit" name="boutton"/>
-            </form>
         </fieldset>
+		</form>
         
 <?php
         
-function getpass($nombre,$valeurs,$nbcarac) {
+function getpass($nombre, $valeurs, $nbcarac) {
     
-$resultat = "";
-    
-for ($i=0; $i<$nombre; $i++) {
-      
-    $val = $valeurs[rand(0,$nbcarac -1)];
-	$resultat = $resultat.$val;
-}
+	$resultat = "";
 
-return $resultat;
+	for ($i=0; $i < $nombre; $i++) {
 
+		$val = $valeurs[rand(0,$nbcarac -1)];
+		$resultat = $resultat.$val;
+	}
+
+	return $resultat;
 }
 
 // longueur mot de passe
@@ -114,23 +97,34 @@ $special = array(",","?",";",".",":","/","!","§","&","~","\"","#","(","[","-","|
 // array_merge  : fusionne plusieurs tableaux en un seul
 
 if (isset($_POST["boutton"])) {
-	if (isset($_POST['minuscule']) || isset($_POST['minuscule']) || isset($_POST['minuscule']) || isset($_POST['minuscule'])) {
+	
+	if (isset($_POST["majuscule"]) || isset($_POST['minuscule']) || isset($_POST['chiffre']) || isset($_POST['special'])) {
+		
+		if (!empty($_POST["nombre"]) && !empty($_POST["longueur"])) {
 
-		if (isset($_POST['minuscule']))
-			$allcaractere = array_merge($allcaractere, $minuscule);
+			if (isset($_POST['minuscule']))
+				$allcaractere = array_merge($allcaractere, $minuscule);
 
-		 if (isset($_POST["majuscule"]))
-			 $allcaractere = array_merge($allcaractere, $majuscule);
+			 if (isset($_POST["majuscule"]))
+				 $allcaractere = array_merge($allcaractere, $majuscule);
 
-		 if (isset($_POST["chiffre"]))
-			 $allcaractere = array_merge($allcaractere, $chiffre);
+			 if (isset($_POST["chiffre"]))
+				 $allcaractere = array_merge($allcaractere, $chiffre);
 
-		if (isset($_POST["special"]))
-			 $allcaractere = array_merge($allcaractere, $special);
+			if (isset($_POST["special"]))
+				 $allcaractere = array_merge($allcaractere, $special);
 
-		$nbcaractere = count($allcaractere);
-		$resut = getpass($_POST["longueur"], $allcaractere, $nbcaractere);
-		echo $resut;
+			$nbcaractere = count($allcaractere);
+			for ($i = 0; $i < $_POST["nombre"]; $i++) {
+				$resut = getpass($_POST["longueur"], $allcaractere, $nbcaractere);
+				echo $resut;
+				echo "</br>";
+			}
+		}
+		else {
+			echo "Veuillez entrer un nombre et une longueur de mot de passe.";
+			echo "</br>";
+		}
 	}
 	else 
 		echo "Veuillez choisir au moins un type de caractère que doit comporter votre mot de passe.";
