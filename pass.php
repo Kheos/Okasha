@@ -42,11 +42,11 @@
 		<form method="post" action="" id="formCheck">
         <fieldset id="fieldCheck">
                 <input type="checkbox" name="majuscule"/>
-                <label>Majuscule</label><br/>
+                <label> Majuscule</label><br/>
                 <input type="checkbox" name="minuscule"/>
-                <label>Minuscule </label><br/>
+                <label> Minuscule </label><br/>
                 <input type="checkbox" name="chiffre"/>
-                <label>Chiffre </label><br/>
+                <label> Chiffre </label><br/>
 				<input type="checkbox" name="special"/>
 				<label> Caractères ASCII </label><br/>
         </fieldset>
@@ -55,11 +55,18 @@
 				<label> Nombre de mot de passe </label><br/>
 				<input type="text" name="longueur" onKeypress="if((event.keyCode < 48 || event.keyCode > 57) && event.which > 31) event.returnValue = false; if((event.which < 48 || event.which > 57) && event.which > 31) return false;">
 				<label> Longeur du mot de passe </label><br/>
-                <input type="submit" name="boutton"/>
+                <input type="submit" name="generer"/>
+				<input type="submit" name="doublon"/>
+				<input type="submit" name="associer"/>
         </fieldset>
 		</form>
         
 <?php
+
+$conn = new PDO("mysql:dbname=genpassword;host=localhost","root","");		//Connexion à la BDD
+$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);				//Active le Mode Exception
+$conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);		//Les résultats seront rangés par défault dans un tableau associatif
+$conn->exec("SET NAMES 'utf8'");											//Transaction avec la BDD en UTF8
         
 function getpass($nombre, $valeurs, $nbcarac) {
     
@@ -72,6 +79,30 @@ function getpass($nombre, $valeurs, $nbcarac) {
 	}
 
 	return $resultat;
+}
+
+function associer ($longueur, $allcaractere, $nbcaractere){
+
+	$ouvre = fopen("login.txt","r");  // Ouverture du fichier
+    while (!feof ($ouvre)) {          // Tant que pas en fin de fichier
+	$lecture = fgets($ouvre, 4096); // Stockage dans $lecture
+	$donnee = explode("*", $lecture);  // Parsing des données basé sur "*")
+                    
+    $combien = count($donnee); // Nombre d'éléments
+    echo "<b>Ce fichier contient ",$combien," couple login et mot de passe : </b><br><br>";
+                    
+    for ($i = 0; $i < $combien; $i++) {
+		// Ajout du mot de passe
+        $result = getpass($longueur, $allcaractere, $nbcaractere);
+        fputs($donnee, '&nbsp' . $result);
+        // Stockage temporaire des données toujours avec le séparateur
+        $liste_modif.=$donnee[$i]."*";
+        }
+	}
+	fclose($ouvre); // Fermeture du document   
+    $ouvre = fopen("login.txt","");
+    fwrite($ouvre, $liste_modif);
+    fclose($ouvre);
 }
 
 // longueur mot de passe
@@ -90,36 +121,43 @@ $minuscule = array("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","
   //  tableau de nombre 
 $chiffre = array("0","1","2","3","4","5","6","7","8","9");
 
-$special = array(",","?",";",".",":","/","!","§","&","~","\"","#","(","[","-","|","`","_","\\","^","@",")","]","=","}","<",">");
+$special = array(",","?",";",".",":","/","!","&","~","\"","#","(","[","-","|","`","_","\\","^","@",")","]","=","}","<",">");
 
 // verification des checkbox 
 
 // array_merge  : fusionne plusieurs tableaux en un seul
 
-if (isset($_POST["boutton"])) {
+if (isset($_POST["generer"]) || isset($_POST["associer"])) {
 	
 	if (isset($_POST["majuscule"]) || isset($_POST['minuscule']) || isset($_POST['chiffre']) || isset($_POST['special'])) {
 		
 		if (!empty($_POST["nombre"]) && !empty($_POST["longueur"])) {
-
+			
 			if (isset($_POST['minuscule']))
 				$allcaractere = array_merge($allcaractere, $minuscule);
 
-			 if (isset($_POST["majuscule"]))
-				 $allcaractere = array_merge($allcaractere, $majuscule);
+			if (isset($_POST["majuscule"]))
+				$allcaractere = array_merge($allcaractere, $majuscule);
 
-			 if (isset($_POST["chiffre"]))
-				 $allcaractere = array_merge($allcaractere, $chiffre);
+			if (isset($_POST["chiffre"]))
+				$allcaractere = array_merge($allcaractere, $chiffre);
 
 			if (isset($_POST["special"]))
-				 $allcaractere = array_merge($allcaractere, $special);
+				$allcaractere = array_merge($allcaractere, $special);
 
 			$nbcaractere = count($allcaractere);
-			for ($i = 0; $i < $_POST["nombre"]; $i++) {
-				$resut = getpass($_POST["longueur"], $allcaractere, $nbcaractere);
-				echo $resut;
-				echo "</br>";
-			}
+			
+			if (isset($_POST["generer"]))
+				for ($i = 0; $i < $_POST["nombre"]; $i++) {
+					$result = getpass($_POST["longueur"], $allcaractere, $nbcaractere);
+					$query = "INSERT INTO `pass` (password) VALUES ('".addslashes($result)."')";
+					$conn->query($query);
+					echo $result;
+					echo "</br>";
+				}
+			
+			if (isset($_POST["associer"]))
+				associer($_POST["longueur"], $allcaractere, $nbcaractere);
 		}
 		else {
 			echo "Veuillez entrer un nombre et une longueur de mot de passe.";
@@ -128,6 +166,16 @@ if (isset($_POST["boutton"])) {
 	}
 	else 
 		echo "Veuillez choisir au moins un type de caractère que doit comporter votre mot de passe.";
+}
+
+if (isset($_POST["doublon"])) {
+	$query = "ALTER IGNORE TABLE pass ADD UNIQUE INDEX (password)";
+	$conn->query($query);
+	$query2 = "SELECT `password`, COUNT(*) AS nombre FROM `pass` GROUP BY `password` HAVING COUNT(*) > 1";
+	$nbdoublons = $conn->query($query2)->fetch();
+	echo $nbdoublons." doublons détectés et supprimés. Suppression des doublons terminée.";
+	$query1 = "ALTER TABLE pass DROP INDEX `password`";
+	$conn->query($query1);
 }
      
 //$rand_keys = array_rand($majuscule, 10);
