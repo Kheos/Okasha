@@ -55,9 +55,9 @@
 				<label> Nombre de mot de passe </label><br/>
 				<input type="text" name="longueur" onKeypress="if((event.keyCode < 48 || event.keyCode > 57) && event.which > 31) event.returnValue = false; if((event.which < 48 || event.which > 57) && event.which > 31) return false;">
 				<label> Longeur du mot de passe </label><br/>
-                <input type="submit" name="generer"/>
-				<input type="submit" name="doublon"/>
-				<input type="submit" name="associer"/>
+                <input type="submit" name="generer" value="Generer"/>
+				<input type="submit" name="doublon" value="Doublon"/>
+				<input type="submit" name="associer" value="Associer"/>
         </fieldset>
 		</form>
         
