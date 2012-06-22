@@ -169,13 +169,16 @@ if (isset($_POST["generer"]) || isset($_POST["associer"])) {
 }
 
 if (isset($_POST["doublon"])) {
-	$query = "ALTER IGNORE TABLE pass ADD UNIQUE INDEX (password)";
-	$conn->query($query);
-	$query2 = "SELECT `password`, COUNT(*) AS nombre FROM `pass` GROUP BY `password` HAVING COUNT(*) > 1";
-	$nbdoublons = $conn->query($query2)->fetch();
-	echo $nbdoublons." doublons détectés et supprimés. Suppression des doublons terminée.";
-	$query1 = "ALTER TABLE pass DROP INDEX `password`";
-	$conn->query($query1);
+	//$query = "ALTER IGNORE TABLE pass ADD UNIQUE INDEX (password)";
+	//$conn->query($query);
+	$query2 = "SELECT min(id) WHERE `password` IN (SELECT `password`, COUNT(`password`) AS nombre FROM `pass` GROUP BY `password` HAVING COUNT(`password`) > 1)";
+	$nbdoublons = $conn->query($query2);
+	$row = $nbdoublons->fetch();
+	echo $row['nombre']." doublons détectés et supprimés. Suppression des doublons terminée.";
+	if ($row['nombre'] <= 1) {
+		$query1 = "DELETE FROM pass WHERE id IN (SELECT min(id), `password`, COUNT(*) AS nombre FROM `pass` GROUP BY `password` HAVING COUNT(*) > 1) ";
+		$conn->query($query1);
+	}
 }
      
 //$rand_keys = array_rand($majuscule, 10);
